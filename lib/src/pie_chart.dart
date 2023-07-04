@@ -32,6 +32,7 @@ class PieChart extends StatefulWidget {
     this.degreeOptions = const DegreeOptions(),
     this.baseChartColor = Colors.transparent,
     this.totalValue,
+    this.onLabelPressed,
   }) : super(key: key);
 
   final Map<String, double> dataMap;
@@ -55,6 +56,7 @@ class PieChart extends StatefulWidget {
   final Map<String, String> legendLabels;
   final Color baseChartColor;
   final double? totalValue;
+  final void Function(String label)? onLabelPressed;
 
   @override
   // ignore: library_private_types_in_public_api
@@ -124,37 +126,36 @@ class _PieChartState extends State<PieChart>
               : null,
           child: CustomPaint(
             painter: PieChartPainter(
-              _animFraction,
-              widget.chartValuesOptions.showChartValues,
-              widget.chartValuesOptions.showChartValuesOutside,
-              widget.colorList,
-              chartValueStyle: widget.chartValuesOptions.chartValueStyle,
-              chartValueBackgroundColor:
-                  widget.chartValuesOptions.chartValueBackgroundColor,
-              values: legendValues,
-              titles: legendTitles,
-              showValuesInPercentage:
-                  widget.chartValuesOptions.showChartValuesInPercentage,
-              decimalPlaces: widget.chartValuesOptions.decimalPlaces,
-              showChartValueLabel:
-                  widget.chartValuesOptions.showChartValueBackground,
-              chartType: widget.chartType,
-              centerText: widget.centerText,
-              centerTextStyle: widget.centerTextStyle,
-              formatChartValues: widget.formatChartValues,
-              strokeWidth: widget.ringStrokeWidth,
-              emptyColor: widget.emptyColor,
-              gradientList: widget.gradientList,
-              emptyColorGradient: widget.emptyColorGradient,
-              degreeOptions: widget.degreeOptions.copyWith(
-                // because we've deprecated initialAngleInDegree,
-                // we want the old value to be used if it's not null
-                // ignore: deprecated_member_use_from_same_package
-                initialAngle: widget.initialAngleInDegree,
-              ),
-              baseChartColor: widget.baseChartColor,
-              totalValue:widget.totalValue
-            ),
+                _animFraction,
+                widget.chartValuesOptions.showChartValues,
+                widget.chartValuesOptions.showChartValuesOutside,
+                widget.colorList,
+                chartValueStyle: widget.chartValuesOptions.chartValueStyle,
+                chartValueBackgroundColor:
+                    widget.chartValuesOptions.chartValueBackgroundColor,
+                values: legendValues,
+                titles: legendTitles,
+                showValuesInPercentage:
+                    widget.chartValuesOptions.showChartValuesInPercentage,
+                decimalPlaces: widget.chartValuesOptions.decimalPlaces,
+                showChartValueLabel:
+                    widget.chartValuesOptions.showChartValueBackground,
+                chartType: widget.chartType,
+                centerText: widget.centerText,
+                centerTextStyle: widget.centerTextStyle,
+                formatChartValues: widget.formatChartValues,
+                strokeWidth: widget.ringStrokeWidth,
+                emptyColor: widget.emptyColor,
+                gradientList: widget.gradientList,
+                emptyColorGradient: widget.emptyColorGradient,
+                degreeOptions: widget.degreeOptions.copyWith(
+                  // because we've deprecated initialAngleInDegree,
+                  // we want the old value to be used if it's not null
+                  // ignore: deprecated_member_use_from_same_package
+                  initialAngle: widget.initialAngleInDegree,
+                ),
+                baseChartColor: widget.baseChartColor,
+                totalValue: widget.totalValue),
             child: const AspectRatio(aspectRatio: 1),
           ),
         ),
@@ -245,6 +246,9 @@ class _PieChartState extends State<PieChart>
               .map(
                 (item) => Legend(
                   title: item,
+                  onTap: () {
+                    widget.onLabelPressed?.call(item);
+                  },
                   color: isGradientPresent
                       ? getGradient(
                           widget.gradientList!, legendTitles!.indexOf(item),
