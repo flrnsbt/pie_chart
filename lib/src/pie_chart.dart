@@ -9,9 +9,12 @@ enum LegendPosition { top, bottom, left, right }
 
 enum ChartType { disc, ring }
 
-class PieChart extends StatefulWidget {
-  const PieChart({
+typedef ChartValueLabelFormatter<T> = String Function(T value);
+
+class PieChart<T> extends StatefulWidget {
+  PieChart({
     required this.dataMap,
+    ChartValueLabelFormatter<T>? labelFormatter,
     this.chartType = ChartType.disc,
     this.chartRadius,
     this.animationDuration,
@@ -27,15 +30,18 @@ class PieChart extends StatefulWidget {
     this.emptyColor = Colors.grey,
     this.gradientList,
     this.emptyColorGradient = const [Colors.black26, Colors.black54],
-    this.legendLabels = const {},
     Key? key,
     this.degreeOptions = const DegreeOptions(),
     this.baseChartColor = Colors.transparent,
     this.totalValue,
     this.onLabelPressed,
-  }) : super(key: key);
+  })  : labelFormatter = labelFormatter ?? defaultFormatter,
+        super(key: key);
 
-  final Map<String, double> dataMap;
+  static ChartValueLabelFormatter defaultFormatter = (data) => data.toString();
+
+  final Map<T, double> dataMap;
+  final ChartValueLabelFormatter<T> labelFormatter;
   final ChartType chartType;
   final double? chartRadius;
   final Duration? animationDuration;
@@ -53,31 +59,30 @@ class PieChart extends StatefulWidget {
   final Color emptyColor;
   final List<Color> emptyColorGradient;
   final DegreeOptions degreeOptions;
-  final Map<String, String> legendLabels;
   final Color baseChartColor;
   final double? totalValue;
-  final void Function(String label)? onLabelPressed;
+  final void Function(T data)? onLabelPressed;
 
   @override
   // ignore: library_private_types_in_public_api
-  _PieChartState createState() => _PieChartState();
+  _PieChartState<T> createState() => _PieChartState<T>();
 }
 
-class _PieChartState extends State<PieChart>
+class _PieChartState<T> extends State<PieChart<T>>
     with SingleTickerProviderStateMixin {
   late Animation<double> animation;
   AnimationController? controller;
   double _animFraction = 0.0;
 
   List<String>? legendTitles;
+
   late List<double> legendValues;
+  late List<T> data;
 
   void initLegends() {
-    final List<String> legendLabelList =
-        widget.dataMap.keys.toList(growable: false);
-    legendTitles = legendLabelList
-        .map((label) => widget.legendLabels[label] ?? label)
-        .toList(growable: false);
+    data = widget.dataMap.keys.toList();
+    legendTitles =
+        data.map((e) => widget.labelFormatter(e)).toList(growable: false);
   }
 
   void initValues() {
@@ -229,7 +234,7 @@ class _PieChartState extends State<PieChart>
     }
   }
 
-  _getLegend({EdgeInsets? padding}) {
+  Widget _getLegend({EdgeInsets? padding}) {
     if (widget.legendOptions.showLegends) {
       final isGradientPresent = widget.gradientList?.isNotEmpty ?? false;
       final isNonGradientElementPresent =
@@ -242,12 +247,15 @@ class _PieChartState extends State<PieChart>
               : Axis.vertical,
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.start,
-          children: legendTitles!
-              .map(
-                (item) => Legend(
+          children: [
+            for (int i = 0; i < legendTitles!.length; i++)
+              () {
+                final item = legendTitles![i];
+                final d = data[i];
+                return Legend(
                   title: item,
                   onTap: () {
-                    widget.onLabelPressed?.call(item);
+                    widget.onLabelPressed?.call(d);
                   },
                   color: isGradientPresent
                       ? getGradient(
@@ -261,9 +269,9 @@ class _PieChartState extends State<PieChart>
                         ),
                   style: widget.legendOptions.legendTextStyle,
                   legendShape: widget.legendOptions.legendShape,
-                ),
-              )
-              .toList(),
+                );
+              }()
+          ],
         ),
       );
     } else {
@@ -284,7 +292,7 @@ class _PieChartState extends State<PieChart>
   }
 
   @override
-  void didUpdateWidget(PieChart oldWidget) {
+  void didUpdateWidget(PieChart<T> oldWidget) {
     initData();
     super.didUpdateWidget(oldWidget);
   }

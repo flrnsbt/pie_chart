@@ -44,13 +44,6 @@ class HomePageState extends State<HomePage> {
     "Ionic": 2,
   };
 
-  final legendLabels = <String, String>{
-    "Flutter": "Flutter legend",
-    "React": "React legend",
-    "Xamarin": "Xamarin legend",
-    "Ionic": "Ionic legend",
-  };
-
   final colorList = <Color>[
     const Color(0xfffdcb6e),
     const Color(0xff0984e3),
@@ -106,7 +99,6 @@ class HomePageState extends State<HomePage> {
       initialAngleInDegree: 0,
       chartType: _chartType!,
       centerText: _showCenterText ? "HYBRID" : null,
-      legendLabels: _showLegendLabel ? legendLabels : {},
       legendOptions: LegendOptions(
         showLegendsInRow: _showLegendsInRow,
         legendPosition: _legendPosition!,
