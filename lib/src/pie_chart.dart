@@ -9,7 +9,7 @@ enum LegendPosition { top, bottom, left, right }
 
 enum ChartType { disc, ring }
 
-typedef ChartValueLabelFormatter<T> = String Function(T? value);
+typedef ChartValueLabelFormatter<T> = String Function(T value);
 
 class PieChart<T> extends StatefulWidget {
   const PieChart({
@@ -83,9 +83,12 @@ class _PieChartState<T> extends State<PieChart<T>>
   late List<double> legendValues;
   late List<T?> data;
 
-  ChartValueLabelFormatter<T> get _format =>
-      widget.labelFormatter ??
-      (data) => data?.toString() ?? (widget.nullValueFormatter ?? 'Others');
+  String _format(T? data) {
+    if (data == null) {
+      return widget.nullValueFormatter ?? 'Others';
+    }
+    return widget.labelFormatter?.call(data) ?? data.toString();
+  }
 
   void initLegends() {
     data = widget.dataMap.keys.toList();
