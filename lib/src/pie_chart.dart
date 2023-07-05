@@ -264,11 +264,11 @@ class _PieChartState<T> extends State<PieChart<T>>
                 final d = data[i];
                 return Legend(
                   title: item,
-                  onTap: () {
-                    if (d != null) {
-                      widget.onLabelPressed?.call(d);
-                    }
-                  },
+                  onTap: d != null
+                      ? () {
+                          widget.onLabelPressed?.call(d);
+                        }
+                      : null,
                   color: isGradientPresent
                       ? getGradient(
                           widget.gradientList!, legendTitles!.indexOf(item),
