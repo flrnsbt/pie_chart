@@ -116,7 +116,7 @@ void main() {
 
   group("Custom legend label test", () {
     testWidgets('Test custom labels are shown', (WidgetTester tester) async {
-      final legendLabel = <String,String> {};
+      final legendLabel = <String, String>{};
       legendLabel.putIfAbsent('Flutter', () => 'Flutter legend');
       legendLabel.putIfAbsent('React', () => 'React legend');
       legendLabel.putIfAbsent('Xamarin', () => 'Xamarin legend');
@@ -126,7 +126,6 @@ void main() {
           body: Center(
             child: PieChart(
               dataMap: dataMap,
-              legendLabels: legendLabel,
             ),
           ),
         ),
@@ -148,15 +147,16 @@ void main() {
         findsOneWidget,
       );
     });
-    testWidgets('Test if label fallback to data map value if not in legendLabels', (WidgetTester tester) async {
-      final legendLabel = <String,String> {};
+    testWidgets(
+        'Test if label fallback to data map value if not in legendLabels',
+        (WidgetTester tester) async {
+      final legendLabel = <String, String>{};
       legendLabel.putIfAbsent('Flutter', () => 'Flutter legend');
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: Center(
             child: PieChart(
               dataMap: dataMap,
-              legendLabels: legendLabel,
             ),
           ),
         ),

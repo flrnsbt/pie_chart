@@ -9,12 +9,12 @@ enum LegendPosition { top, bottom, left, right }
 
 enum ChartType { disc, ring }
 
-typedef ChartValueLabelFormatter<T> = String Function(T value);
+typedef ChartValueLabelFormatter<T> = String Function(T? value);
 
 class PieChart<T> extends StatefulWidget {
-  PieChart({
+  const PieChart({
     required this.dataMap,
-    ChartValueLabelFormatter<T>? labelFormatter,
+    this.labelFormatter,
     this.chartType = ChartType.disc,
     this.chartRadius,
     this.animationDuration,
@@ -35,14 +35,18 @@ class PieChart<T> extends StatefulWidget {
     this.baseChartColor = Colors.transparent,
     this.totalValue,
     this.onLabelPressed,
-  })  : labelFormatter = labelFormatter ?? defaultFormatter,
-        super(key: key);
+    this.nullValueFormatter,
+  }) : super(key: key);
 
-  static ChartValueLabelFormatter defaultFormatter = (data) => data.toString();
+  final Map<T?, double> dataMap;
 
-  final Map<T, double> dataMap;
-  final ChartValueLabelFormatter<T> labelFormatter;
+  /// [labelFormatter] is used to format the label of the chart values.
+  final ChartValueLabelFormatter<T>? labelFormatter;
   final ChartType chartType;
+
+  /// [nullValueFormatter] is the text that will be displayed when the value of the chart is null.
+  /// By default it is set to 'Others'.
+  final String? nullValueFormatter;
   final double? chartRadius;
   final Duration? animationDuration;
   final double chartLegendSpacing;
@@ -77,12 +81,15 @@ class _PieChartState<T> extends State<PieChart<T>>
   List<String>? legendTitles;
 
   late List<double> legendValues;
-  late List<T> data;
+  late List<T?> data;
+
+  ChartValueLabelFormatter<T> get _format =>
+      widget.labelFormatter ??
+      (data) => data?.toString() ?? (widget.nullValueFormatter ?? 'Others');
 
   void initLegends() {
     data = widget.dataMap.keys.toList();
-    legendTitles =
-        data.map((e) => widget.labelFormatter(e)).toList(growable: false);
+    legendTitles = data.map((e) => _format(e)).toList(growable: false);
   }
 
   void initValues() {
@@ -255,7 +262,9 @@ class _PieChartState<T> extends State<PieChart<T>>
                 return Legend(
                   title: item,
                   onTap: () {
-                    widget.onLabelPressed?.call(d);
+                    if (d != null) {
+                      widget.onLabelPressed?.call(d);
+                    }
                   },
                   color: isGradientPresent
                       ? getGradient(
